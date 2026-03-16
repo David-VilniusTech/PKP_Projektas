@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Checkout</title>
+
+<style>
+body{
+    font-family: Arial;
+    text-align: center;
+    margin-top: 80px;
+}
+
+form{
+    background: #f4f4f4;
+    display: inline-block;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+input{
+    padding: 8px;
+    margin: 8px;
+    width: 250px;
+}
+
+button{
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Checkout</h1>
+
+<p id="selectedPlan"></p>
+
+<form onsubmit="submitOrder(event)">
+
+<input type="text" placeholder="Full Name" required><br>
+
+<input type="text" placeholder="Address" required><br>
+
+<input type="text" placeholder="Credit Card Number" required><br>
+
+<input type="text" placeholder="Expiration Date (MM/YY)" required><br>
+
+<input type="text" placeholder="CVV" required><br><br>
+
+<button type="submit">Place Order</button>
+
+</form>
+
+<p id="message"></p>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const plan = params.get("plan");
+
+document.getElementById("selectedPlan").innerText =
+"Selected Meal Plan: " + plan;
+
+function submitOrder(event){
+    event.preventDefault();
+
+    const name = document.querySelector("input[placeholder='Full Name']").value;
+    const address = document.querySelector("input[placeholder='Address']").value;
+
+    fetch("http://localhost:3000/order", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            name: name,
+            address: address,
+            plan: plan
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("message").innerText =
+        "Order placed successfully!";
+    });
+}
+
+</script>
+
+</body>
+</html>
