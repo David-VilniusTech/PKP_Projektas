@@ -1,204 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HealthyBite</title>
-  <style>
-    :root {
-      --green: #2ecc71;
-      --blue: #3498db;
-      --dark: #2c3e50;
-      --light: #ecf0f1;
-    }
+<meta charset="UTF-8">
+<title>Meal Delivery Service</title>
 
-    * {
-      box-sizing: border-box;
-    }
+<style>
+body{
+    font-family: Arial;
+    text-align: center;
+    margin-top: 120px;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background-color: var(--light);
-      color: var(--dark);
-    }
+.container{
+    background: #f4f4f4;
+    padding: 30px;
+    display: inline-block;
+    border-radius: 10px;
+}
 
-    header {
-      background: linear-gradient(90deg, var(--green), var(--blue));
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
+select, button{
+    padding: 10px;
+    font-size: 16px;
+    margin-top: 10px;
+}
 
-    nav {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      background-color: white;
-      padding: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    nav a {
-      text-decoration: none;
-      color: var(--dark);
-      font-weight: bold;
-    }
-
-    .hero {
-      text-align: center;
-      padding: 60px 20px;
-      background: linear-gradient(rgba(255,255,255,0.85), rgba(255,255,255,0.85)), url('https://images.unsplash.com/photo-1490645935967-10de6ba17061');
-      background-size: cover;
-      background-position: center;
-    }
-
-    .hero h1 {
-      font-size: 42px;
-      margin-bottom: 10px;
-    }
-
-    .hero p {
-      font-size: 18px;
-      margin-bottom: 25px;
-    }
-
-    .btn {
-      background-color: var(--green);
-      border: none;
-      padding: 12px 24px;
-      color: white;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .btn:hover {
-      background-color: #27ae60;
-    }
-
-    .section {
-      padding: 50px 20px;
-      max-width: 1100px;
-      margin: auto;
-    }
-
-    .section h2 {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-
-    .card h3 {
-      margin-top: 0;
-      color: var(--blue);
-    }
-
-    .preferences {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-
-    .chip {
-      padding: 10px 18px;
-      border-radius: 20px;
-      background-color: var(--blue);
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    footer {
-      margin-top: 50px;
-      background-color: var(--dark);
-      color: white;
-      text-align: center;
-      padding: 20px;
-      font-size: 14px;
-    }
-
-    @media (max-width: 600px) {
-      .hero h1 {
-        font-size: 30px;
-      }
-    }
-  </style>
+button{
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+</style>
 </head>
+
 <body>
 
-<header>
-  <h1>HealthyBite</h1>
-  <p>Fresh • Healthy • Delivered to Your Door</p>
-</header>
+<h1>Weekly Meal Delivery</h1>
 
-<nav>
-  <a href="#">Home</a>
-  <a href="#meals">Meals</a>
-  <a href="#plans">Plans</a>
-  <a href="#contact">Contact</a>
-</nav>
+<div class="container">
 
-<section class="hero">
-  <h1>Healthy Food Made Easy</h1>
-  <p>Choose your diet preferences and get personalized meals delivered daily</p>
-  <button class="btn">Get Started</button>
-</section>
+<p>Select your meal plan:</p>
 
-<section class="section" id="meals">
-  <h2>Meal Categories</h2>
-  <div class="cards">
-    <div class="card">
-      <h3>🥦 Vegetarian</h3>
-      <p>Plant-based meals rich in nutrients and flavor.</p>
-    </div>
-    <div class="card">
-      <h3>🌱 Vegan</h3>
-      <p>100% plant-based options for a sustainable lifestyle.</p>
-    </div>
-    <div class="card">
-      <h3>🐟 Pescatarian</h3>
-      <p>Balanced meals including fish and seafood.</p>
-    </div>
-    <div class="card">
-      <h3>💪 High-Protein</h3>
-      <p>Perfect for active lifestyles and fitness goals.</p>
-    </div>
-  </div>
-</section>
+<select id="mealPlan">
+    <option value="Regular">Regular</option>
+    <option value="Vegan">Vegan</option>
+</select>
 
-<section class="section" id="plans">
-  <h2>Select Your Preferences</h2>
-  <p style="text-align:center">(Prototype UI — no functionality yet)</p>
-  <div class="preferences">
-    <div class="chip">Vegetarian</div>
-    <div class="chip">Vegan</div>
-    <div class="chip">Pescatarian</div>
-    <div class="chip">Gluten-Free</div>
-    <div class="chip">Dairy-Free</div>
-    <div class="chip">Keto</div>
-    <div class="chip">Low-Calorie</div>
-  </div>
-</section>
+<br><br>
 
-<footer>
-  © 2026 HealthyBite • Prototype for Software Design Project
-</footer>
+<button onclick="goToCheckout()">Continue to Checkout</button>
+
+</div>
+
+<script>
+function goToCheckout(){
+    let plan = document.getElementById("mealPlan").value;
+    window.location.href = "checkout.html?plan=" + plan;
+}
+</script>
 
 </body>
 </html>
