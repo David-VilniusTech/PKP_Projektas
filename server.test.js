@@ -74,14 +74,12 @@ test("Atsakymas turi success: true", async () => {
   expect(res.body).toHaveProperty("success", true);
 });
 
-// 14. Užsakymas su tuščiu body
 test("Grąžina klaidą arba success su tuščiu body", async () => {
   const res = await request(app).post("/order").send({});
   // backend įrašo null reikšmes - tai validuotina ateityje
   expect([200, 500]).toContain(res.statusCode);
 });
 
-// 15. POST /order endpoint egzistuoja
 test("POST /order endpoint egzistuoja (ne 404)", async () => {
   const res = await request(app).post("/order").send({
     name: "Test",
@@ -91,7 +89,6 @@ test("POST /order endpoint egzistuoja (ne 404)", async () => {
   expect(res.statusCode).not.toBe(404);
 });
 
-// 16. GET /order grąžina 404 (tik POST palaikomas)
 test("GET /order grąžina 404", async () => {
   const res = await request(app).get("/order");
   expect(res.statusCode).toBe(404);
