@@ -24,3 +24,21 @@ button{
     border-radius: 5px;
     cursor: pointer;
 }
+
+table {
+    margin: 20px auto;
+    border-collapse: collapse;
+    width: 100%;
+}
+th {
+    background-color: #28a745;
+    color: white;
+    padding: 10px;
+}
+td {
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+tr:nth-child(even) {
+    background-color: #e9e9e9;
+}
