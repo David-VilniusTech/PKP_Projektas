@@ -14,10 +14,20 @@
 
 <p>Select your meal plan:</p>
 
-<select id="mealPlan">
+<select id="mealPlan" onchange="updateMenu()">
     <option value="Regular">Regular</option>
     <option value="Vegan">Vegan</option>
 </select>
+
+<h3 id="menuTitle">Regular Weekly Menu</h3>
+<table id="menuTable">
+  <thead>
+    <tr>
+      <th>Day</th><th>Breakfast</th><th>Lunch</th><th>Dinner</th>
+    </tr>
+  </thead>
+  <tbody id="menuBody"></tbody>
+</table>
 
 <br><br>
 
@@ -26,10 +36,43 @@
 </div>
 
 <script>
+const menus = {
+  Regular: [
+    { day: "Monday",    breakfast: "Scrambled eggs",      lunch: "Chicken soup",        dinner: "Grilled chicken & rice" },
+    { day: "Tuesday",   breakfast: "Oatmeal & bacon",     lunch: "Beef sandwich",        dinner: "Pork chops & potatoes" },
+    { day: "Wednesday", breakfast: "Pancakes",            lunch: "Chicken Caesar salad", dinner: "Beef stew" },
+    { day: "Thursday",  breakfast: "Yogurt & granola",    lunch: "Turkey wrap",          dinner: "Salmon & vegetables" },
+    { day: "Friday",    breakfast: "Toast & eggs",        lunch: "Minestrone soup",      dinner: "Grilled steak & fries" },
+    { day: "Saturday",  breakfast: "Waffles",             lunch: "BLT sandwich",         dinner: "Roast chicken" },
+    { day: "Sunday",    breakfast: "French toast",        lunch: "Meatball pasta",       dinner: "BBQ ribs & coleslaw" },
+  ],
+  Vegan: [
+    { day: "Monday",    breakfast: "Smoothie bowl",       lunch: "Lentil soup",          dinner: "Chickpea curry & rice" },
+    { day: "Tuesday",   breakfast: "Avocado toast",       lunch: "Falafel wrap",         dinner: "Tofu stir-fry" },
+    { day: "Wednesday", breakfast: "Oatmeal & berries",   lunch: "Tomato soup",          dinner: "Vegan pasta" },
+    { day: "Thursday",  breakfast: "Chia pudding",        lunch: "Buddha bowl",          dinner: "Stuffed bell peppers" },
+    { day: "Friday",    breakfast: "Fruit salad",         lunch: "Hummus & pita",        dinner: "Vegetable tagine" },
+    { day: "Saturday",  breakfast: "Banana pancakes",     lunch: "Quinoa salad",         dinner: "Black bean tacos" },
+    { day: "Sunday",    breakfast: "Granola & almond milk", lunch: "Mushroom soup",      dinner: "Lentil shepherd's pie" },
+  ]
+}; 
+
+function updateMenu() {
+  const plan = document.getElementById("mealPlan").value;
+  document.getElementById("menuTitle").innerText = plan + " Weekly Menu";
+  const tbody = document.getElementById("menuBody");
+  tbody.innerHTML = "";
+  menus[plan].forEach(row => {
+    tbody.innerHTML += `<tr><td><strong>${row.day}</strong></td><td>${row.breakfast}</td><td>${row.lunch}</td><td>${row.dinner}</td></tr>`;
+  });
+}
+
 function goToCheckout(){
     let plan = document.getElementById("mealPlan").value;
     window.location.href = "checkout.html?plan=" + plan;
 }
+
+updateMenu();
 </script>
 
 </body>
