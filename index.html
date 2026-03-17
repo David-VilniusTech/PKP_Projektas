@@ -3,35 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Meal Delivery Service</title>
-
-<style>
-body{
-    font-family: Arial;
-    text-align: center;
-    margin-top: 120px;
-}
-
-.container{
-    background: #f4f4f4;
-    padding: 30px;
-    display: inline-block;
-    border-radius: 10px;
-}
-
-select, button{
-    padding: 10px;
-    font-size: 16px;
-    margin-top: 10px;
-}
-
-button{
-    background-color: #29ae48;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-</style>
+<link rel="stylesheet" href = "styles.css">
 </head>
 
 <body>
@@ -42,10 +14,28 @@ button{
 
 <p>Select your meal plan:</p>
 
-<select id="mealPlan">
+<select id="mealPlan" onchange="updateMenu()">
     <option value="Regular">Regular</option>
     <option value="Vegan">Vegan</option>
 </select>
+
+<h3 id="menuTitle">Regular Weekly Menu</h3>
+<table id="menuTable">
+  <thead>
+  <tr>
+    <th>Day</th>
+    <th>Breakfast</th>
+    <th>Lunch</th>
+    <th>Dinner</th>
+    <th>Kcal</th>
+    <th>Baltymai</th>
+    <th>Angliav.</th>
+    <th>Riebalai</th>
+    <th>Skaidulos</th>
+  </tr>
+</thead>
+  <tbody id="menuBody"></tbody>
+</table>
 
 <br><br>
 
@@ -54,10 +44,139 @@ button{
 </div>
 
 <script>
+const menus = {
+  Regular: [
+    {
+      day: "Monday",
+      breakfast: "Scrambled eggs",
+      lunch: "Chicken soup",
+      dinner: "Grilled chicken & rice",
+      nutrition: { kcal: 2100, protein: 140, carbs: 180, fat: 95, fiber: 18 }
+    },
+    {
+      day: "Tuesday",
+      breakfast: "Oatmeal & bacon",
+      lunch: "Beef sandwich",
+      dinner: "Pork chops & potatoes",
+      nutrition: { kcal: 2350, protein: 135, carbs: 210, fat: 120, fiber: 22 }
+    },
+    {
+      day: "Wednesday",
+      breakfast: "Pancakes",
+      lunch: "Chicken Caesar salad",
+      dinner: "Beef stew",
+      nutrition: { kcal: 2200, protein: 125, carbs: 190, fat: 115, fiber: 18 }
+    },
+    {
+      day: "Thursday",
+      breakfast: "Yogurt & granola",
+      lunch: "Turkey wrap",
+      dinner: "Salmon & vegetables",
+      nutrition: { kcal: 2000, protein: 130, carbs: 170, fat: 95, fiber: 24 }
+    },
+    {
+      day: "Friday",
+      breakfast: "Toast & eggs",
+      lunch: "Minestrone soup",
+      dinner: "Grilled steak & fries",
+      nutrition: { kcal: 2450, protein: 145, carbs: 220, fat: 125, fiber: 20 }
+    },
+    {
+      day: "Saturday",
+      breakfast: "Waffles",
+      lunch: "BLT sandwich",
+      dinner: "Roast chicken",
+      nutrition: { kcal: 2300, protein: 140, carbs: 200, fat: 115, fiber: 16 }
+    },
+    {
+      day: "Sunday",
+      breakfast: "French toast",
+      lunch: "Meatball pasta",
+      dinner: "BBQ ribs & coleslaw",
+      nutrition: { kcal: 2600, protein: 150, carbs: 230, fat: 140, fiber: 19 }
+    }
+  ],
+
+  Vegan: [
+    {
+      day: "Monday",
+      breakfast: "Smoothie bowl",
+      lunch: "Lentil soup",
+      dinner: "Chickpea curry & rice",
+      nutrition: { kcal: 1950, protein: 75, carbs: 290, fat: 55, fiber: 38 }
+    },
+    {
+      day: "Tuesday",
+      breakfast: "Avocado toast",
+      lunch: "Falafel wrap",
+      dinner: "Tofu stir-fry",
+      nutrition: { kcal: 2100, protein: 80, carbs: 260, fat: 85, fiber: 34 }
+    },
+    {
+      day: "Wednesday",
+      breakfast: "Oatmeal & berries",
+      lunch: "Tomato soup",
+      dinner: "Vegan pasta",
+      nutrition: { kcal: 1900, protein: 70, carbs: 300, fat: 50, fiber: 36 }
+    },
+    {
+      day: "Thursday",
+      breakfast: "Chia pudding",
+      lunch: "Buddha bowl",
+      dinner: "Stuffed bell peppers",
+      nutrition: { kcal: 2000, protein: 72, carbs: 285, fat: 60, fiber: 40 }
+    },
+    {
+      day: "Friday",
+      breakfast: "Fruit salad",
+      lunch: "Hummus & pita",
+      dinner: "Vegetable tagine",
+      nutrition: { kcal: 1850, protein: 60, carbs: 295, fat: 48, fiber: 42 }
+    },
+    {
+      day: "Saturday",
+      breakfast: "Banana pancakes",
+      lunch: "Quinoa salad",
+      dinner: "Black bean tacos",
+      nutrition: { kcal: 2150, protein: 78, carbs: 310, fat: 62, fiber: 44 }
+    },
+    {
+      day: "Sunday",
+      breakfast: "Granola & almond milk",
+      lunch: "Mushroom soup",
+      dinner: "Lentil shepherd's pie",
+      nutrition: { kcal: 2050, protein: 74, carbs: 300, fat: 58, fiber: 46 }
+    }
+  ]
+};
+
+function updateMenu() {
+  const plan = document.getElementById("mealPlan").value;
+  document.getElementById("menuTitle").innerText = plan + " Weekly Menu";
+  const tbody = document.getElementById("menuBody");
+  tbody.innerHTML = "";
+  menus[plan].forEach(row => {
+    tbody.innerHTML += `
+<tr>
+  <td><strong>${row.day}</strong></td>
+  <td>${row.breakfast}</td>
+  <td>${row.lunch}</td>
+  <td>${row.dinner}</td>
+  <td>${row.nutrition.kcal} kcal</td>
+  <td>${row.nutrition.protein} g</td>
+  <td>${row.nutrition.carbs} g</td>
+  <td>${row.nutrition.fat} g</td>
+  <td>${row.nutrition.fiber} g</td>
+</tr>`;
+  });
+}
+
 function goToCheckout(){
     let plan = document.getElementById("mealPlan").value;
     window.location.href = "checkout.html?plan=" + plan;
 }
+
+updateMenu();
 </script>
 
 </body>
