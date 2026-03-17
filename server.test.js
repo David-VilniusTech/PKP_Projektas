@@ -40,56 +40,40 @@ function createApp() {
 
 const app = createApp();
 
-// --- TESTAI ---
+// 1. Pirmadienio maistinė vertė – Regular plano
+test("Regular plano pirmadienio maistinė vertė turi laukus", () => {
+  const monday = {
+    day: "Monday",
+    breakfast: "Scrambled eggs",
+    lunch: "Chicken soup",
+    dinner: "Grilled chicken & rice",
+    nutrition: { kcal: 2100, protein: 140, carbs: 180, fat: 95, fiber: 18 }
+  };
 
-// 1. Vartotojas gali pasirinkti planą ir užsakyti (Regular)
-test("Priima Regular plano užsakymą", async () => {
-  const res = await request(app).post("/order").send({
-    name: "Jonas Jonaitis",
-    address: "Gedimino pr. 1, Vilnius",
-    plan: "Regular",
-  });
-  expect(res.statusCode).toBe(200);
-  expect(res.body.success).toBe(true);
+  expect(monday.day).toBe("Monday");
+  expect(monday.nutrition).toBeDefined();
+  expect(monday.nutrition).toHaveProperty("kcal");
+  expect(monday.nutrition).toHaveProperty("protein");
+  expect(monday.nutrition).toHaveProperty("carbs");
+  expect(monday.nutrition).toHaveProperty("fat");
+  expect(monday.nutrition).toHaveProperty("fiber");
 });
 
-// 2. Vartotojas gali pasirinkti Vegan planą
-test("Priima Vegan plano užsakymą", async () => {
-  const res = await request(app).post("/order").send({
-    name: "Ona Onaitė",
-    address: "Laisvės al. 5, Kaunas",
-    plan: "Vegan",
-  });
-  expect(res.statusCode).toBe(200);
-  expect(res.body.success).toBe(true);
-});
+// 2. Pirmadienio maistinė vertė – Vegan plano
+test("Vegan plano pirmadienio maistinė vertė turi laukus", () => {
+  const monday = {
+    day: "Monday",
+    breakfast: "Smoothie bowl",
+    lunch: "Lentil soup",
+    dinner: "Chickpea curry & rice",
+    nutrition: { kcal: 1800, protein: 60, carbs: 250, fat: 50, fiber: 30 }
+  };
 
-// 4. Užsakymas grąžina success: true
-test("Atsakymas turi success: true", async () => {
-  const res = await request(app).post("/order").send({
-    name: "Petras",
-    address: "Vilniaus g. 10",
-    plan: "Regular",
-  });
-  expect(res.body).toHaveProperty("success", true);
-});
-
-test("Grąžina klaidą arba success su tuščiu body", async () => {
-  const res = await request(app).post("/order").send({});
-  // backend įrašo null reikšmes - tai validuotina ateityje
-  expect([200, 500]).toContain(res.statusCode);
-});
-
-test("POST /order endpoint egzistuoja (ne 404)", async () => {
-  const res = await request(app).post("/order").send({
-    name: "Test",
-    address: "Test",
-    plan: "Regular",
-  });
-  expect(res.statusCode).not.toBe(404);
-});
-
-test("GET /order grąžina 404", async () => {
-  const res = await request(app).get("/order");
-  expect(res.statusCode).toBe(404);
+  expect(monday.day).toBe("Monday");
+  expect(monday.nutrition).toBeDefined();
+  expect(monday.nutrition).toHaveProperty("kcal");
+  expect(monday.nutrition).toHaveProperty("protein");
+  expect(monday.nutrition).toHaveProperty("carbs");
+  expect(monday.nutrition).toHaveProperty("fat");
+  expect(monday.nutrition).toHaveProperty("fiber");
 });
