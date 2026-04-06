@@ -2,182 +2,158 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Meal Delivery Service</title>
-<link rel="stylesheet" href = "styles.css">
+<title>NourishBox — Choose Your Plan</title>
+<link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-<h1>Weekly Meal Delivery</h1>
+<nav>
+  <a href="index.html" class="nav-logo">🥗 NourishBox</a>
+  <div class="nav-links">
+    <a href="index.html" class="active">Plans</a>
+    <a href="dashboard.html">My Subscription</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="cancel.html">Cancel</a>
+  </div>
+</nav>
 
-<div class="container">
+<div class="page">
+  <h1>Weekly Meal Delivery</h1>
+  <p class="subtitle">Fresh, chef-curated meals delivered to your door every Saturday.</p>
 
-<p>Select your meal plan:</p>
+  <div class="card">
+    <h2>Choose Your Plan</h2>
+    <p class="text-muted text-sm mt-8">Prices are per week, billed on checkout.</p>
 
-<select id="mealPlan" onchange="updateMenu()">
-    <option value="Regular">Regular</option>
-    <option value="Vegan">Vegan</option>
-</select>
+    <div class="plan-grid">
+      <div class="plan-card selected" id="card-Regular" onclick="selectPlan('Regular')">
+        <div class="checkmark">✓</div>
+        <div class="plan-icon">🍗</div>
+        <div class="plan-name">Regular</div>
+        <div class="plan-price">€79 <span>/ week</span></div>
+        <div class="plan-desc">Balanced meals with meat, fish and dairy. ~2250 kcal/day average.</div>
+      </div>
+      <div class="plan-card" id="card-Vegan" onclick="selectPlan('Vegan')">
+        <div class="checkmark">✓</div>
+        <div class="plan-icon">🌱</div>
+        <div class="plan-name">Vegan</div>
+        <div class="plan-price">€69 <span>/ week</span></div>
+        <div class="plan-desc">100% plant-based, high-fibre meals. ~2000 kcal/day average.</div>
+      </div>
+    </div>
 
-<h3 id="menuTitle">Regular Weekly Menu</h3>
-<table id="menuTable">
-  <thead>
-  <tr>
-    <th>Day</th>
-    <th>Breakfast</th>
-    <th>Lunch</th>
-    <th>Dinner</th>
-    <th>Kcal</th>
-    <th>Baltymai</th>
-    <th>Angliav.</th>
-    <th>Riebalai</th>
-    <th>Skaidulos</th>
-  </tr>
-</thead>
-  <tbody id="menuBody"></tbody>
-</table>
+    <div class="alert alert-success">
+      📦 Next delivery: <strong id="next-delivery-date">calculating…</strong> — order before midnight Sunday.
+    </div>
+  </div>
 
-<br><br>
+  <div class="card">
+    <div class="row-between mb-16">
+      <h2 id="menuTitle">Regular Weekly Menu</h2>
+      <span class="badge badge-amber" id="plan-badge">Regular</span>
+    </div>
 
-<button onclick="goToCheckout()">Continue to Checkout</button>
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Breakfast</th>
+            <th>Lunch</th>
+            <th>Dinner</th>
+            <th>Kcal</th>
+            <th>Protein</th>
+            <th>Carbs</th>
+            <th>Fat</th>
+            <th>Fibre</th>
+          </tr>
+        </thead>
+        <tbody id="menuBody"></tbody>
+      </table>
+    </div>
 
+    <div class="divider"></div>
+    <div class="row-between">
+      <div>
+        <div class="text-sm text-muted">Weekly daily average</div>
+        <div style="font-size:1.1rem;font-weight:700;color:var(--green);" id="avg-kcal">— kcal</div>
+      </div>
+      <button class="btn btn-primary" onclick="goToCheckout()">Continue to Checkout →</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const menus = {
   Regular: [
-    {
-      day: "Monday",
-      breakfast: "Scrambled eggs",
-      lunch: "Chicken soup",
-      dinner: "Grilled chicken & rice",
-      nutrition: { kcal: 2100, protein: 140, carbs: 180, fat: 95, fiber: 18 }
-    },
-    {
-      day: "Tuesday",
-      breakfast: "Oatmeal & bacon",
-      lunch: "Beef sandwich",
-      dinner: "Pork chops & potatoes",
-      nutrition: { kcal: 2350, protein: 135, carbs: 210, fat: 120, fiber: 22 }
-    },
-    {
-      day: "Wednesday",
-      breakfast: "Pancakes",
-      lunch: "Chicken Caesar salad",
-      dinner: "Beef stew",
-      nutrition: { kcal: 2200, protein: 125, carbs: 190, fat: 115, fiber: 18 }
-    },
-    {
-      day: "Thursday",
-      breakfast: "Yogurt & granola",
-      lunch: "Turkey wrap",
-      dinner: "Salmon & vegetables",
-      nutrition: { kcal: 2000, protein: 130, carbs: 170, fat: 95, fiber: 24 }
-    },
-    {
-      day: "Friday",
-      breakfast: "Toast & eggs",
-      lunch: "Minestrone soup",
-      dinner: "Grilled steak & fries",
-      nutrition: { kcal: 2450, protein: 145, carbs: 220, fat: 125, fiber: 20 }
-    },
-    {
-      day: "Saturday",
-      breakfast: "Waffles",
-      lunch: "BLT sandwich",
-      dinner: "Roast chicken",
-      nutrition: { kcal: 2300, protein: 140, carbs: 200, fat: 115, fiber: 16 }
-    },
-    {
-      day: "Sunday",
-      breakfast: "French toast",
-      lunch: "Meatball pasta",
-      dinner: "BBQ ribs & coleslaw",
-      nutrition: { kcal: 2600, protein: 150, carbs: 230, fat: 140, fiber: 19 }
-    }
+    { day:"Monday",    breakfast:"Scrambled eggs",      lunch:"Chicken soup",        dinner:"Grilled chicken & rice", nutrition:{kcal:2100,protein:140,carbs:180,fat:95,fiber:18} },
+    { day:"Tuesday",   breakfast:"Oatmeal & bacon",     lunch:"Beef sandwich",       dinner:"Pork chops & potatoes",  nutrition:{kcal:2350,protein:135,carbs:210,fat:120,fiber:22} },
+    { day:"Wednesday", breakfast:"Pancakes",            lunch:"Chicken Caesar salad",dinner:"Beef stew",              nutrition:{kcal:2200,protein:125,carbs:190,fat:115,fiber:18} },
+    { day:"Thursday",  breakfast:"Yogurt & granola",    lunch:"Turkey wrap",         dinner:"Salmon & vegetables",    nutrition:{kcal:2000,protein:130,carbs:170,fat:95,fiber:24} },
+    { day:"Friday",    breakfast:"Toast & eggs",        lunch:"Minestrone soup",     dinner:"Grilled steak & fries",  nutrition:{kcal:2450,protein:145,carbs:220,fat:125,fiber:20} },
+    { day:"Saturday",  breakfast:"Waffles",             lunch:"BLT sandwich",        dinner:"Roast chicken",          nutrition:{kcal:2300,protein:140,carbs:200,fat:115,fiber:16} },
+    { day:"Sunday",    breakfast:"French toast",        lunch:"Meatball pasta",      dinner:"BBQ ribs & coleslaw",    nutrition:{kcal:2600,protein:150,carbs:230,fat:140,fiber:19} }
   ],
-
   Vegan: [
-    {
-      day: "Monday",
-      breakfast: "Smoothie bowl",
-      lunch: "Lentil soup",
-      dinner: "Chickpea curry & rice",
-      nutrition: { kcal: 1950, protein: 75, carbs: 290, fat: 55, fiber: 38 }
-    },
-    {
-      day: "Tuesday",
-      breakfast: "Avocado toast",
-      lunch: "Falafel wrap",
-      dinner: "Tofu stir-fry",
-      nutrition: { kcal: 2100, protein: 80, carbs: 260, fat: 85, fiber: 34 }
-    },
-    {
-      day: "Wednesday",
-      breakfast: "Oatmeal & berries",
-      lunch: "Tomato soup",
-      dinner: "Vegan pasta",
-      nutrition: { kcal: 1900, protein: 70, carbs: 300, fat: 50, fiber: 36 }
-    },
-    {
-      day: "Thursday",
-      breakfast: "Chia pudding",
-      lunch: "Buddha bowl",
-      dinner: "Stuffed bell peppers",
-      nutrition: { kcal: 2000, protein: 72, carbs: 285, fat: 60, fiber: 40 }
-    },
-    {
-      day: "Friday",
-      breakfast: "Fruit salad",
-      lunch: "Hummus & pita",
-      dinner: "Vegetable tagine",
-      nutrition: { kcal: 1850, protein: 60, carbs: 295, fat: 48, fiber: 42 }
-    },
-    {
-      day: "Saturday",
-      breakfast: "Banana pancakes",
-      lunch: "Quinoa salad",
-      dinner: "Black bean tacos",
-      nutrition: { kcal: 2150, protein: 78, carbs: 310, fat: 62, fiber: 44 }
-    },
-    {
-      day: "Sunday",
-      breakfast: "Granola & almond milk",
-      lunch: "Mushroom soup",
-      dinner: "Lentil shepherd's pie",
-      nutrition: { kcal: 2050, protein: 74, carbs: 300, fat: 58, fiber: 46 }
-    }
+    { day:"Monday",    breakfast:"Smoothie bowl",         lunch:"Lentil soup",    dinner:"Chickpea curry & rice",  nutrition:{kcal:1950,protein:75,carbs:290,fat:55,fiber:38} },
+    { day:"Tuesday",   breakfast:"Avocado toast",         lunch:"Falafel wrap",   dinner:"Tofu stir-fry",          nutrition:{kcal:2100,protein:80,carbs:260,fat:85,fiber:34} },
+    { day:"Wednesday", breakfast:"Oatmeal & berries",     lunch:"Tomato soup",    dinner:"Vegan pasta",            nutrition:{kcal:1900,protein:70,carbs:300,fat:50,fiber:36} },
+    { day:"Thursday",  breakfast:"Chia pudding",          lunch:"Buddha bowl",    dinner:"Stuffed bell peppers",   nutrition:{kcal:2000,protein:72,carbs:285,fat:60,fiber:40} },
+    { day:"Friday",    breakfast:"Fruit salad",           lunch:"Hummus & pita",  dinner:"Vegetable tagine",       nutrition:{kcal:1850,protein:60,carbs:295,fat:48,fiber:42} },
+    { day:"Saturday",  breakfast:"Banana pancakes",       lunch:"Quinoa salad",   dinner:"Black bean tacos",       nutrition:{kcal:2150,protein:78,carbs:310,fat:62,fiber:44} },
+    { day:"Sunday",    breakfast:"Granola & almond milk", lunch:"Mushroom soup",  dinner:"Lentil shepherd's pie",  nutrition:{kcal:2050,protein:74,carbs:300,fat:58,fiber:46} }
   ]
 };
 
+let selectedPlan = 'Regular';
+
+function selectPlan(plan) {
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('card-' + plan).classList.add('selected');
+  selectedPlan = plan;
+  updateMenu();
+}
+
 function updateMenu() {
-  const plan = document.getElementById("mealPlan").value;
-  document.getElementById("menuTitle").innerText = plan + " Weekly Menu";
-  const tbody = document.getElementById("menuBody");
-  tbody.innerHTML = "";
-  menus[plan].forEach(row => {
-    tbody.innerHTML += `
-<tr>
-  <td><strong>${row.day}</strong></td>
-  <td>${row.breakfast}</td>
-  <td>${row.lunch}</td>
-  <td>${row.dinner}</td>
-  <td>${row.nutrition.kcal} kcal</td>
-  <td>${row.nutrition.protein} g</td>
-  <td>${row.nutrition.carbs} g</td>
-  <td>${row.nutrition.fat} g</td>
-  <td>${row.nutrition.fiber} g</td>
-</tr>`;
+  document.getElementById('menuTitle').innerText = selectedPlan + ' Weekly Menu';
+  const badge = document.getElementById('plan-badge');
+  badge.innerText = selectedPlan;
+  badge.className = 'badge ' + (selectedPlan === 'Vegan' ? 'badge-green' : 'badge-amber');
+
+  const tbody = document.getElementById('menuBody');
+  tbody.innerHTML = '';
+  let total = 0;
+  menus[selectedPlan].forEach(row => {
+    total += row.nutrition.kcal;
+    tbody.innerHTML += `<tr>
+      <td><strong>${row.day}</strong></td>
+      <td>${row.breakfast}</td>
+      <td>${row.lunch}</td>
+      <td>${row.dinner}</td>
+      <td class="kcal-col">${row.nutrition.kcal} kcal</td>
+      <td class="num-col">${row.nutrition.protein}g</td>
+      <td class="num-col">${row.nutrition.carbs}g</td>
+      <td class="num-col">${row.nutrition.fat}g</td>
+      <td class="num-col">${row.nutrition.fiber}g</td>
+    </tr>`;
   });
+  document.getElementById('avg-kcal').innerText =
+    Math.round(total / menus[selectedPlan].length) + ' kcal / day avg';
 }
 
-function goToCheckout(){
-    let plan = document.getElementById("mealPlan").value;
-    window.location.href = "checkout.html?plan=" + plan;
+function goToCheckout() {
+  window.location.href = 'checkout.html?plan=' + selectedPlan;
 }
 
+function getNextDelivery() {
+  const now = new Date();
+  const daysUntilSat = (6 - now.getDay() + 7) % 7 || 7;
+  const next = new Date(now);
+  next.setDate(now.getDate() + daysUntilSat);
+  return next.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+}
+document.getElementById('next-delivery-date').innerText = getNextDelivery();
 updateMenu();
 </script>
-
 </body>
 </html>

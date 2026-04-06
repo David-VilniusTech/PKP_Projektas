@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NourishBox — My Subscription</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">🥗 NourishBox</a>
+  <div class="nav-links">
+    <a href="index.html">Plans</a>
+    <a href="dashboard.html" class="active">My Subscription</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="cancel.html">Cancel</a>
+  </div>
+</nav>
+
+<div class="page-sm" id="main-content" style="display:none;">
+
+  <!-- SUBSCRIPTION DETAILS -->
+  <h1>My Subscription</h1>
+  <p class="subtitle">Manage your plan, see delivery dates and payment history.</p>
+
+  <div class="card">
+    <div class="row-between">
+      <h2>Subscription Details</h2>
+      <span class="badge badge-green">Active</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="row-between mt-8 mb-8">
+      <span class="text-muted">Name</span>
+      <span id="detail-name" style="font-weight:600;">—</span>
+    </div>
+    <div class="row-between mb-8">
+      <span class="text-muted">Delivery Address</span>
+      <span id="detail-address" style="font-weight:600;text-align:right;max-width:60%;">—</span>
+    </div>
+    <div class="row-between mb-8">
+      <span class="text-muted">Current Plan</span>
+      <span id="detail-plan" style="font-weight:600;">—</span>
+    </div>
+    <div class="row-between mb-8">
+      <span class="text-muted">Weekly Price</span>
+      <span id="detail-price" style="font-weight:700;color:var(--green);font-size:1.1rem;">—</span>
+    </div>
+    <div class="row-between">
+      <span class="text-muted">Next Delivery</span>
+      <span id="detail-delivery" style="font-weight:600;">—</span>
+    </div>
+  </div>
+
+  <!-- DELIVERY TIMELINE -->
+  <div class="card">
+    <h3 class="mb-16">This Week's Delivery</h3>
+    <div class="timeline" id="timeline"></div>
+    <p class="text-sm text-muted mt-8" id="timeline-msg"></p>
+  </div>
+
+  <!-- CHANGE PLAN -->
+  <div class="card">
+    <h2>Change Plan</h2>
+    <p class="text-muted text-sm mt-8 mb-16">Switch between Regular and Vegan. Takes effect next week.</p>
+
+    <div class="plan-grid">
+      <div class="plan-card" id="change-Regular" onclick="selectNewPlan('Regular')">
+        <div class="checkmark">✓</div>
+        <div class="plan-icon">🍗</div>
+        <div class="plan-name">Regular</div>
+        <div class="plan-price">€79 <span>/ week</span></div>
+      </div>
+      <div class="plan-card" id="change-Vegan" onclick="selectNewPlan('Vegan')">
+        <div class="checkmark">✓</div>
+        <div class="plan-icon">🌱</div>
+        <div class="plan-name">Vegan</div>
+        <div class="plan-price">€69 <span>/ week</span></div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="change-error"></div>
+    <div class="alert alert-success" id="change-success" style="display:none;">
+      ✅ Plan updated successfully!
+    </div>
+
+    <button class="btn btn-outline mt-8" id="change-btn" onclick="changePlan()">
+      Save Changes
+    </button>
+  </div>
+
+  <!-- PAYMENT HISTORY -->
+  <div class="card">
+    <h2>Payment History</h2>
+    <div class="divider"></div>
+    <div style="overflow-x:auto;">
+      <table class="data-table" id="payment-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Plan</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="payment-body">
+          <tr><td colspan="4" style="color:var(--muted);text-align:center;padding:24px;">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:8px;">
+    <a href="cancel.html" style="color:var(--red);font-size:0.9rem;text-decoration:none;">Cancel my subscription</a>
+  </div>
+</div>
+
+<!-- LOOKUP (shown when no name in URL) -->
+<div class="page-sm" id="lookup-content">
+  <h1>My Subscription</h1>
+  <p class="subtitle">Enter your details to view your subscription.</p>
+  <div class="card">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="lookup-name" placeholder="Jonas Jonaitis">
+    </div>
+    <div class="form-group">
+      <label>Delivery Address</label>
+      <input type="text" id="lookup-address" placeholder="Gedimino pr. 1, Vilnius">
+    </div>
+    <div class="error-msg" id="lookup-error">No subscription found.</div>
+    <button class="btn btn-primary btn-block" onclick="lookupSub()">
+      <span id="lookup-btn">View My Subscription</span>
+    </button>
+  </div>
+</div>
+
+<script>
+const PRICES = { Regular: 79, Vegan: 69 };
+let currentOrder = null;
+let pendingPlan = null;
+
+function getNextDelivery() {
+  const now = new Date();
+  const daysUntilSat = (6 - now.getDay() + 7) % 7 || 7;
+  const next = new Date(now);
+  next.setDate(now.getDate() + daysUntilSat);
+  return next.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+}
+
+function buildTimeline() {
+  const steps = [
+    { label: 'Order Placed', icon: '✓' },
+    { label: 'Preparing',    icon: '🍳' },
+    { label: 'Packed',       icon: '📦' },
+    { label: 'Out for Delivery', icon: '🚚' },
+    { label: 'Delivered',    icon: '🎉' }
+  ];
+  // Simulate progress based on day of week (Mon-Tue=1, Wed-Thu=2, Fri=3, Sat=4/5)
+  const day = new Date().getDay();
+  let progress = 1;
+  if (day === 3 || day === 4) progress = 2;
+  else if (day === 5) progress = 3;
+  else if (day === 6) progress = 5;
+
+  const tl = document.getElementById('timeline');
+  tl.innerHTML = '';
+  steps.forEach((s, i) => {
+    const done   = i < progress;
+    const active = i === progress;
+    tl.innerHTML += `
+      <div class="tl-step ${done ? 'done' : active ? 'active' : ''}">
+        <div class="tl-dot">${s.icon}</div>
+        <div class="tl-label">${s.label}</div>
+      </div>`;
+  });
+
+  const msgs = ['','Meals are being prepared by our chefs.','Your box is packed and sealed.','Your delivery is on the way!','Delivered — enjoy your meals! 🎉'];
+  document.getElementById('timeline-msg').innerText = msgs[Math.min(progress, 4)] || 'Your order for this week is confirmed.';
+}
+
+function populateDashboard(order) {
+  currentOrder = order;
+  document.getElementById('lookup-content').style.display = 'none';
+  document.getElementById('main-content').style.display   = 'block';
+
+  document.getElementById('detail-name').innerText     = order.name;
+  document.getElementById('detail-address').innerText  = order.address;
+  document.getElementById('detail-plan').innerText     = order.meal_plan;
+  document.getElementById('detail-price').innerText    = '€' + (PRICES[order.meal_plan] || '—') + ' / week';
+  document.getElementById('detail-delivery').innerText = getNextDelivery();
+
+  // Highlight current plan in change section
+  selectNewPlan(order.meal_plan, true);
+  buildTimeline();
+  buildPaymentHistory(order);
+}
+
+function buildPaymentHistory(order) {
+  const tbody = document.getElementById('payment-body');
+  // Simulate 4 weeks of payments
+  const price = PRICES[order.meal_plan] || 79;
+  let rows = '';
+  for (let i = 0; i < 4; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() - (i * 7));
+    const dateStr = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    rows += `<tr>
+      <td>${dateStr}</td>
+      <td>${order.meal_plan}</td>
+      <td style="font-weight:600;">€${price}.00</td>
+      <td><span class="badge badge-green">Paid</span></td>
+    </tr>`;
+  }
+  tbody.innerHTML = rows;
+}
+
+function selectNewPlan(plan, silent) {
+  pendingPlan = plan;
+  document.querySelectorAll('[id^="change-"]').forEach(c => {
+    if (c.classList.contains('plan-card')) c.classList.remove('selected');
+  });
+  const card = document.getElementById('change-' + plan);
+  if (card) card.classList.add('selected');
+  if (!silent) {
+    document.getElementById('change-success').style.display = 'none';
+    document.getElementById('change-error').style.display   = 'none';
+  }
+}
+
+function changePlan() {
+  if (!currentOrder || !pendingPlan) return;
+  if (pendingPlan === currentOrder.meal_plan) {
+    document.getElementById('change-error').style.display = 'block';
+    document.getElementById('change-error').innerText = 'This is already your current plan.';
+    return;
+  }
+  document.getElementById('change-error').style.display = 'none';
+  document.getElementById('change-btn').innerHTML = '<span class="spinner"></span>Saving…';
+
+  fetch('http://localhost:3000/order/change/' + currentOrder.id, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan: pendingPlan })
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('change-btn').innerText = 'Save Changes';
+    if (data.success) {
+      currentOrder.meal_plan = pendingPlan;
+      document.getElementById('detail-plan').innerText  = pendingPlan;
+      document.getElementById('detail-price').innerText = '€' + PRICES[pendingPlan] + ' / week';
+      document.getElementById('change-success').style.display = 'block';
+    }
+  })
+  .catch(() => {
+    document.getElementById('change-btn').innerText = 'Save Changes';
+  });
+}
+
+function lookupSub() {
+  const name    = document.getElementById('lookup-name').value.trim();
+  const address = document.getElementById('lookup-address').value.trim();
+  const errEl   = document.getElementById('lookup-error');
+  if (!name || !address) { errEl.style.display = 'block'; errEl.innerText = 'Please fill in both fields.'; return; }
+  errEl.style.display = 'none';
+  document.getElementById('lookup-btn').innerHTML = '<span class="spinner"></span>Looking up…';
+
+  fetch(`http://localhost:3000/order/lookup?name=${encodeURIComponent(name)}&address=${encodeURIComponent(address)}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('lookup-btn').innerText = 'View My Subscription';
+      if (!data.found) { errEl.style.display = 'block'; errEl.innerText = 'No subscription found.'; return; }
+      populateDashboard(data.order);
+    })
+    .catch(() => {
+      document.getElementById('lookup-btn').innerText = 'View My Subscription';
+      errEl.style.display = 'block'; errEl.innerText = 'Server error.';
+    });
+}
+
+// Auto-load if redirected from checkout
+const params = new URLSearchParams(window.location.search);
+const urlName = params.get('name');
+const urlAddr = params.get('address');
+if (urlName && urlAddr) {
+  fetch(`http://localhost:3000/order/lookup?name=${encodeURIComponent(urlName)}&address=${encodeURIComponent(urlAddr)}`)
+    .then(r => r.json())
+    .then(data => { if (data.found) populateDashboard(data.order); })
+    .catch(() => {});
+} else {
+  document.getElementById('lookup-content').style.display = 'block';
+}
+</script>
+</body>
+</html>

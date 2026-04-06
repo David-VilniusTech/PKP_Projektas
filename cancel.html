@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NourishBox — Cancel Subscription</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">🥗 NourishBox</a>
+  <div class="nav-links">
+    <a href="index.html">Plans</a>
+    <a href="dashboard.html">My Subscription</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="cancel.html" class="active">Cancel</a>
+  </div>
+</nav>
+
+<div class="page-sm">
+
+  <!-- STEP 1: LOOKUP -->
+  <div id="step-lookup">
+    <h1>Cancel Subscription</h1>
+    <p class="subtitle">Enter your details to find your active subscription.</p>
+
+    <div class="card">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="inp-name" placeholder="Jonas Jonaitis">
+      </div>
+      <div class="form-group">
+        <label>Delivery Address</label>
+        <input type="text" id="inp-address" placeholder="Gedimino pr. 1, Vilnius">
+      </div>
+      <div class="error-msg" id="lookup-error">No active subscription found.</div>
+      <button class="btn btn-primary btn-block" onclick="lookupOrder()">
+        <span id="lookup-btn-text">Find My Subscription</span>
+      </button>
+    </div>
+
+    <p class="text-sm text-muted" style="text-align:center;">
+      <a href="index.html" style="color:var(--green);">← Back to meal plans</a>
+    </p>
+  </div>
+
+  <!-- STEP 2: CONFIRM -->
+  <div id="step-confirm" style="display:none;">
+    <h1>Confirm Cancellation</h1>
+    <p class="subtitle">Please review your subscription before cancelling.</p>
+
+    <div class="card">
+      <div class="row-between mb-8">
+        <span class="text-muted">Name</span>
+        <span id="confirm-name" style="font-weight:600;">—</span>
+      </div>
+      <div class="row-between mb-8">
+        <span class="text-muted">Address</span>
+        <span id="confirm-address" style="font-weight:600;">—</span>
+      </div>
+      <div class="row-between mb-8">
+        <span class="text-muted">Plan</span>
+        <span id="confirm-plan" style="font-weight:600;">—</span>
+      </div>
+      <div class="row-between">
+        <span class="text-muted">Status</span>
+        <span class="badge badge-green">Active</span>
+      </div>
+
+      <div class="divider"></div>
+      <div class="alert alert-warning">
+        <strong>⚠️ This cannot be undone.</strong>
+        Your subscription will be cancelled immediately and no further deliveries will be scheduled.
+      </div>
+
+      <button class="btn btn-danger btn-block" onclick="confirmCancel()">
+        <span id="cancel-btn-text">Yes, Cancel My Subscription</span>
+      </button>
+      <button class="btn btn-ghost btn-block mt-8" onclick="goBack()">
+        Keep My Subscription
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 3: DONE -->
+  <div id="step-done" style="display:none;text-align:center;">
+    <div style="font-size:3.5rem;margin-bottom:16px;">👋</div>
+    <h1>Subscription Cancelled</h1>
+    <p class="subtitle">Your <strong id="done-plan"></strong> plan has been cancelled. We hope to see you again!</p>
+    <a href="index.html" class="btn btn-primary">Browse Plans Again</a>
+  </div>
+
+</div>
+
+<script>
+let foundOrderId = null;
+
+function lookupOrder() {
+  const name    = document.getElementById('inp-name').value.trim();
+  const address = document.getElementById('inp-address').value.trim();
+  const errEl   = document.getElementById('lookup-error');
+  if (!name || !address) { errEl.style.display = 'block'; errEl.innerText = 'Please fill in both fields.'; return; }
+  errEl.style.display = 'none';
+  document.getElementById('lookup-btn-text').innerHTML = '<span class="spinner"></span>Looking up…';
+
+  fetch(`http://localhost:3000/order/lookup?name=${encodeURIComponent(name)}&address=${encodeURIComponent(address)}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('lookup-btn-text').innerText = 'Find My Subscription';
+      if (!data.found) { errEl.style.display = 'block'; errEl.innerText = 'No active subscription found.'; return; }
+      foundOrderId = data.order.id;
+      document.getElementById('confirm-name').innerText    = data.order.name;
+      document.getElementById('confirm-address').innerText = data.order.address;
+      document.getElementById('confirm-plan').innerText    = data.order.meal_plan;
+      document.getElementById('step-lookup').style.display  = 'none';
+      document.getElementById('step-confirm').style.display = 'block';
+    })
+    .catch(() => {
+      document.getElementById('lookup-btn-text').innerText = 'Find My Subscription';
+      errEl.style.display = 'block'; errEl.innerText = 'Could not connect to server.';
+    });
+}
+
+function confirmCancel() {
+  if (!foundOrderId) return;
+  document.getElementById('cancel-btn-text').innerHTML = '<span class="spinner"></span>Cancelling…';
+  fetch(`http://localhost:3000/order/cancel/${foundOrderId}`, { method: 'DELETE' })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        document.getElementById('done-plan').innerText = document.getElementById('confirm-plan').innerText;
+        document.getElementById('step-confirm').style.display = 'none';
+        document.getElementById('step-done').style.display    = 'block';
+      }
+    })
+    .catch(() => { document.getElementById('cancel-btn-text').innerText = 'Yes, Cancel My Subscription'; });
+}
+
+function goBack() {
+  document.getElementById('step-confirm').style.display = 'none';
+  document.getElementById('step-lookup').style.display  = 'block';
+}
+</script>
+</body>
+</html>

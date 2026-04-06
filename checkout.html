@@ -2,95 +2,140 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Checkout</title>
-
-<style>
-body{
-    font-family: Arial;
-    text-align: center;
-    margin-top: 80px;
-}
-
-form{
-    background: #f4f4f4;
-    display: inline-block;
-    padding: 30px;
-    border-radius: 10px;
-}
-
-input{
-    padding: 8px;
-    margin: 8px;
-    width: 250px;
-}
-
-button{
-    padding: 10px 20px;
-    background: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-}
-</style>
+<title>NourishBox — Checkout</title>
+<link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
 
-<h1>Checkout</h1>
+<nav>
+  <a href="index.html" class="nav-logo">🥗 NourishBox</a>
+  <div class="nav-links">
+    <a href="index.html">Plans</a>
+    <a href="dashboard.html">My Subscription</a>
+    <a href="reviews.html">Reviews</a>
+    <a href="cancel.html">Cancel</a>
+  </div>
+</nav>
 
-<p id="selectedPlan"></p>
+<div class="page-sm">
+  <h1>Checkout</h1>
+  <p class="subtitle">You're one step away from delicious weekly meals.</p>
 
-<form onsubmit="submitOrder(event)">
+  <!-- ORDER SUMMARY -->
+  <div class="card" id="summary-card">
+    <h3>Order Summary</h3>
+    <div class="divider"></div>
+    <div class="row-between mt-8">
+      <span class="text-muted">Plan</span>
+      <span id="sum-plan" style="font-weight:600;">—</span>
+    </div>
+    <div class="row-between mt-8">
+      <span class="text-muted">Price</span>
+      <span id="sum-price" style="font-weight:700;font-size:1.2rem;color:var(--green);">—</span>
+    </div>
+    <div class="row-between mt-8">
+      <span class="text-muted">First delivery</span>
+      <span id="sum-delivery" style="font-weight:600;">—</span>
+    </div>
+  </div>
 
-<input type="text" placeholder="Full Name" required><br>
+  <!-- FORM -->
+  <div class="card">
+    <h3>Your Details</h3>
+    <div class="divider"></div>
 
-<input type="text" placeholder="Address" required><br>
+    <div class="form-group mt-16">
+      <label>Full Name</label>
+      <input type="text" id="inp-name" placeholder="Jonas Jonaitis" required>
+    </div>
+    <div class="form-group">
+      <label>Delivery Address</label>
+      <input type="text" id="inp-address" placeholder="Gedimino pr. 1, Vilnius" required>
+    </div>
 
-<input type="text" placeholder="Credit Card Number" required><br>
+    <h3 class="mt-16">Payment</h3>
+    <div class="divider"></div>
+    <div class="form-group mt-16">
+      <label>Card Number</label>
+      <input type="text" id="inp-card" placeholder="1234 5678 9012 3456" maxlength="19">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="form-group">
+        <label>Expiry (MM/YY)</label>
+        <input type="text" id="inp-expiry" placeholder="08/27" maxlength="5">
+      </div>
+      <div class="form-group">
+        <label>CVV</label>
+        <input type="text" id="inp-cvv" placeholder="123" maxlength="3">
+      </div>
+    </div>
 
-<input type="text" placeholder="Expiration Date (MM/YY)" required><br>
+    <div class="error-msg" id="form-error">Please fill in all fields.</div>
 
-<input type="text" placeholder="CVV" required><br><br>
+    <button class="btn btn-primary btn-block mt-16" onclick="submitOrder()">
+      <span id="btn-text">Place Order</span>
+    </button>
+  </div>
 
-<button type="submit">Place Order</button>
-
-</form>
-
-<p id="message"></p>
+  <p class="text-sm text-muted" style="text-align:center;">
+    Already a subscriber? <a href="cancel.html" style="color:var(--green);">Cancel your subscription</a>
+  </p>
+</div>
 
 <script>
-
+const PRICES = { Regular: 79, Vegan: 69 };
 const params = new URLSearchParams(window.location.search);
-const plan = params.get("plan");
+const plan = params.get('plan') || 'Regular';
 
-document.getElementById("selectedPlan").innerText =
-"Selected Meal Plan: " + plan;
+document.getElementById('sum-plan').innerText  = plan;
+document.getElementById('sum-price').innerText = '€' + (PRICES[plan] || '—') + ' / week';
 
-function submitOrder(event){
-    event.preventDefault();
-
-    const name = document.querySelector("input[placeholder='Full Name']").value;
-    const address = document.querySelector("input[placeholder='Address']").value;
-
-    fetch("http://localhost:3000/order", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            name: name,
-            address: address,
-            plan: plan
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("message").innerText =
-        "Order placed successfully!";
-    });
+function getNextDelivery() {
+  const now = new Date();
+  const daysUntilSat = (6 - now.getDay() + 7) % 7 || 7;
+  const next = new Date(now);
+  next.setDate(now.getDate() + daysUntilSat);
+  return next.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
 }
+document.getElementById('sum-delivery').innerText = getNextDelivery();
 
+// Card number formatting
+document.getElementById('inp-card').addEventListener('input', function() {
+  this.value = this.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim();
+});
+
+function submitOrder() {
+  const name    = document.getElementById('inp-name').value.trim();
+  const address = document.getElementById('inp-address').value.trim();
+  const card    = document.getElementById('inp-card').value.trim();
+  const expiry  = document.getElementById('inp-expiry').value.trim();
+  const cvv     = document.getElementById('inp-cvv').value.trim();
+  const errEl   = document.getElementById('form-error');
+
+  if (!name || !address || !card || !expiry || !cvv) {
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const btn = document.getElementById('btn-text');
+  btn.innerHTML = '<span class="spinner"></span>Placing order…';
+
+  fetch('http://localhost:3000/order', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, address, plan, price: PRICES[plan] })
+  })
+  .then(r => r.json())
+  .then(data => {
+    window.location.href = 'dashboard.html?name=' + encodeURIComponent(name) + '&address=' + encodeURIComponent(address);
+  })
+  .catch(() => {
+    btn.innerText = 'Place Order';
+    errEl.style.display = 'block';
+    errEl.innerText = 'Could not connect to server.';
+  });
+}
 </script>
-
 </body>
 </html>

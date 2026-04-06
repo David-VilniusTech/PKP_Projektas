@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NourishBox — Reviews</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .review-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    border-left: 4px solid var(--green-light);
+  }
+  .review-meta { font-size:0.82rem; color:var(--muted); margin-top:6px; }
+  .review-text { margin-top:10px; font-size:0.95rem; line-height:1.65; }
+  .star-row { display:flex; gap:3px; }
+  .star-display { color: var(--amber); font-size:1rem; }
+  .star-display.empty { color: #d0d0d0; }
+  .rating-input { display:flex; gap:6px; flex-direction:row-reverse; justify-content:flex-end; }
+  .rating-input input { display:none; }
+  .rating-input label {
+    font-size:2rem; cursor:pointer; color:#d0d0d0;
+    transition:color 0.12s; text-transform:none; letter-spacing:0;
+    font-weight:400;
+  }
+  .rating-input label:hover,
+  .rating-input label:hover ~ label,
+  .rating-input input:checked ~ label { color: var(--amber); }
+  .avg-score { font-size:3rem; font-weight:700; font-family:'Playfair Display',serif; color:var(--green); line-height:1; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">🥗 NourishBox</a>
+  <div class="nav-links">
+    <a href="index.html">Plans</a>
+    <a href="dashboard.html">My Subscription</a>
+    <a href="reviews.html" class="active">Reviews</a>
+    <a href="cancel.html">Cancel</a>
+  </div>
+</nav>
+
+<div class="page">
+  <h1>Customer Reviews</h1>
+  <p class="subtitle">See what our subscribers think — and share your own experience.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;align-items:start;">
+
+    <!-- LEAVE A REVIEW -->
+    <div>
+      <div class="card">
+        <h2>Leave a Review</h2>
+        <div class="divider"></div>
+
+        <div class="form-group mt-16">
+          <label>Your Name</label>
+          <input type="text" id="rev-name" placeholder="Jonas J.">
+        </div>
+
+        <div class="form-group">
+          <label>Plan</label>
+          <select id="rev-plan">
+            <option value="Regular">Regular</option>
+            <option value="Vegan">Vegan</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Rating</label>
+          <div class="rating-input" id="star-input">
+            <input type="radio" name="rating" id="s5" value="5"><label for="s5">★</label>
+            <input type="radio" name="rating" id="s4" value="4"><label for="s4">★</label>
+            <input type="radio" name="rating" id="s3" value="3"><label for="s3">★</label>
+            <input type="radio" name="rating" id="s2" value="2"><label for="s2">★</label>
+            <input type="radio" name="rating" id="s1" value="1"><label for="s1">★</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Your Review</label>
+          <textarea id="rev-text" placeholder="Tell us about your experience…"></textarea>
+        </div>
+
+        <div class="error-msg" id="rev-error">Please fill in all fields and select a rating.</div>
+        <div class="alert alert-success" id="rev-success" style="display:none;">
+          ✅ Thank you for your review!
+        </div>
+
+        <button class="btn btn-primary btn-block" onclick="submitReview()">
+          <span id="rev-btn">Submit Review</span>
+        </button>
+      </div>
+
+      <!-- AVERAGE SCORE -->
+      <div class="card" style="text-align:center;" id="avg-card">
+        <div class="avg-score" id="avg-score">—</div>
+        <div class="star-row" id="avg-stars" style="justify-content:center;margin:8px 0 4px;"></div>
+        <div class="text-muted text-sm" id="avg-count">No reviews yet</div>
+      </div>
+    </div>
+
+    <!-- REVIEWS LIST -->
+    <div id="reviews-list">
+      <div class="text-muted text-sm" style="padding:24px 0;">Loading reviews…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function renderStars(rating, total = 5) {
+  let s = '';
+  for (let i = 1; i <= total; i++)
+    s += `<span class="star-display ${i <= rating ? '' : 'empty'}">★</span>`;
+  return s;
+}
+
+function loadReviews() {
+  fetch('http://localhost:3000/reviews')
+    .then(r => r.json())
+    .then(data => {
+      const list = document.getElementById('reviews-list');
+      if (!data.reviews || data.reviews.length === 0) {
+        list.innerHTML = '<p class="text-muted">No reviews yet. Be the first!</p>';
+        return;
+      }
+      // Average
+      const avg = (data.reviews.reduce((s, r) => s + r.rating, 0) / data.reviews.length).toFixed(1);
+      document.getElementById('avg-score').innerText = avg;
+      document.getElementById('avg-stars').innerHTML = renderStars(Math.round(avg));
+      document.getElementById('avg-count').innerText = data.reviews.length + ' review' + (data.reviews.length !== 1 ? 's' : '');
+
+      list.innerHTML = '';
+      data.reviews.slice().reverse().forEach(r => {
+        const d = new Date(r.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+        list.innerHTML += `
+          <div class="review-card">
+            <div class="row-between">
+              <strong>${r.reviewer_name}</strong>
+              <span class="badge badge-${r.plan === 'Vegan' ? 'green' : 'amber'}">${r.plan}</span>
+            </div>
+            <div class="star-row mt-8">${renderStars(r.rating)}</div>
+            <div class="review-text">${r.review_text}</div>
+            <div class="review-meta">${d}</div>
+          </div>`;
+      });
+    })
+    .catch(() => {
+      document.getElementById('reviews-list').innerHTML =
+        '<p class="text-muted">Could not load reviews. Is the server running?</p>';
+    });
+}
+
+function submitReview() {
+  const name   = document.getElementById('rev-name').value.trim();
+  const plan   = document.getElementById('rev-plan').value;
+  const text   = document.getElementById('rev-text').value.trim();
+  const rating = document.querySelector('input[name="rating"]:checked');
+  const errEl  = document.getElementById('rev-error');
+
+  if (!name || !text || !rating) { errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none';
+
+  document.getElementById('rev-btn').innerHTML = '<span class="spinner"></span>Submitting…';
+
+  fetch('http://localhost:3000/reviews', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ reviewer_name: name, plan, rating: parseInt(rating.value), review_text: text })
+  })
+  .then(r => r.json())
+  .then(() => {
+    document.getElementById('rev-btn').innerText = 'Submit Review';
+    document.getElementById('rev-success').style.display = 'block';
+    document.getElementById('rev-name').value = '';
+    document.getElementById('rev-text').value = '';
+    document.querySelectorAll('input[name="rating"]').forEach(r => r.checked = false);
+    loadReviews();
+  })
+  .catch(() => {
+    document.getElementById('rev-btn').innerText = 'Submit Review';
+    errEl.style.display = 'block'; errEl.innerText = 'Server error. Try again.';
+  });
+}
+
+loadReviews();
+</script>
+</body>
+</html>
