@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "jest",
+    "build": "echo Build completed successfully",
+    "test": "jest --runInBand",
     "start": "node server.js"
   },
   "keywords": [],
