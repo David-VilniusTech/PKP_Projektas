@@ -21,15 +21,49 @@ db.run(`
 app.post("/order", (req, res) => {
   const { name, address, plan } = req.body;
 
+  if (!name || name.trim() === "") {
+    return res.status(400).json({
+      success: false,
+      error: "Name is required"
+    });
+  }
+
+  if (!address || address.trim() === "") {
+    return res.status(400).json({
+      success: false,
+      error: "Address is required"
+    });
+  }
+
+  if (!plan || plan.trim() === "") {
+    return res.status(400).json({
+      success: false,
+      error: "Plan is required"
+    });
+  }
+
+  const allowedPlans = ["Regular", "Vegan"];
+  if (!allowedPlans.includes(plan)) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid meal plan"
+    });
+  }
+
   db.run(
     "INSERT INTO orders (name, address, meal_plan) VALUES (?, ?, ?)",
     [name, address, plan],
     function (err) {
       if (err) {
-        res.status(500).send(err);
-      } else {
-        res.send({ success: true });
+        return res.status(500).json({
+          success: false,
+          error: "Database error"
+        });
       }
+
+      return res.status(200).json({
+        success: true
+      });
     }
   );
 });
