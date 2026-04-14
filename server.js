@@ -28,19 +28,7 @@ app.post("/order", (req, res) => {
     });
   }
 
-  if (!address || address.trim() === "") {
-    return res.status(400).json({
-      success: false,
-      error: "Address is required"
-    });
-  }
 
-  if (!plan || plan.trim() === "") {
-    return res.status(400).json({
-      success: false,
-      error: "Plan is required"
-    });
-  }
 
   const allowedPlans = ["Regular", "Vegan"];
   if (!allowedPlans.includes(plan)) {
